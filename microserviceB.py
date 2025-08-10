@@ -1,34 +1,26 @@
 # myBookNook Microservice B
 # This microservice takes an ISBN and returns the Title, Author, and Description of the book
 
-import isbnlib
+from isbnlib import meta, desc
 import zmq
 
 # Gets the title, author, and description for the specified ISBN
 # Returns a dictionary with said information
 def get_book_info(isbn):
-    global title, author
-    book_data = isbnlib.meta(isbn)
-
+    book_data = meta(isbn)
+    book_info = {"isbn": isbn}
     for key, value in book_data.items():
         match key:
             case "Title":
-                title = value
+                book_info["title"] = value
             case "Authors":
-                author = value[0]
-
-    description = isbnlib.desc(isbn)
-
-    book_info = {
-        "isbn": isbn,
-        "title": title,
-        "author": author,
-        "description": description
-    }
+                book_info["author"] = value[0]
+    book_info["description"] = desc(isbn)
 
     return book_info
 
 
+# Establish a socket to receive client connections
 context = zmq.Context()
 socket = context.socket(zmq.REP)
 socket.bind("tcp://*:5556")
